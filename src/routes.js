@@ -1,16 +1,19 @@
 const express = require('express');
 const login = require('./controlers/login');
-const user = require('./controlers/user');
+const users = require('./controlers/users');
 const clients = require('./controlers/clients');
+const tokenValidation = require('./filters/tokenValidation');
 
 const routes = express();
 
-routes.post('/cadastrarUsuario', user.registerUser);
+routes.post('/cadastrarUsuario', users.registerUser);
 routes.post('/login', login);
 
-routes.get('/home', user.home);
-routes.put('atualizarUsuario', user.updateUser);
-routes.post('adicionarCliente', clients.addClient);
+routes.use(tokenValidation);
+
+// routes.get('/home', users.home);
+// routes.put('atualizarUsuario', users.updateUser);
+// routes.post('adicionarCliente', clients.addClient);
 
 module.exports = routes;
 
