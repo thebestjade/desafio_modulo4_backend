@@ -27,7 +27,7 @@ const registerClient = async (req, res) => {
       district: bairro,
       city: cidade,
       uf: estado
-    }).returning('*');
+    });
 
     if (!registeredClient) {
       return res.status(400).json("Não foi possível cadastrar o cliente")
