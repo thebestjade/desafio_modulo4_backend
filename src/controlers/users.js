@@ -21,13 +21,13 @@ const registerUser = async (req, res) => {
       name: nome,
       email,
       password: criptPassword
-    }).returning('*');
+    });
 
     if (!registeredUser) {
       return res.status(400).json("O usuário não pôde ser cadastrado");
     }
 
-    return res.status(200).json(registeredUser);
+    return res.status(200).json("Usuário cadastrado com sucesso");
 
   } catch (error) {
     return res.status(400).json(error.message)

@@ -9,6 +9,12 @@ const registerClient = async (req, res) => {
 
     await registerClientSchema.validate(req.body);
 
+    const client = await knex('clients').where({ email }).first();
+
+    if (client) {
+      return res.status(400).json("Cliente já cadastrado")
+    }
+
     const registeredClient = await knex('clients').insert({
       user_id: user.id,
       name: nome,
