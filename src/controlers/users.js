@@ -1,13 +1,13 @@
 const knex = require('../connection');
 const bcrypt = require('bcrypt');
-const regiterSchema = require('../yup_validations/registerSchema');
+const regiterUserSchema = require('../yup_validations/registerUserSchema');
 
 const registerUser = async (req, res) => {
   const { nome, email, senha } = req.body;
 
   try {
 
-    await regiterSchema.validate(req.body);
+    await regiterUserSchema.validate(req.body);
 
     const user = await knex('users').where({ email }).first();
 

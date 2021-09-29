@@ -11,9 +11,10 @@ routes.post('/login', login);
 
 routes.use(tokenValidation);
 
-// routes.get('/home', users.home);
-// routes.put('atualizarUsuario', users.updateUser);
-// routes.post('adicionarCliente', clients.addClient);
+routes.get('/home', users.home);
+routes.get('/profile', users.profile);
+routes.put('/editarUsuario', users.updateUser);
+routes.post('/cadastrarCliente', clients.registerClient);
 
 module.exports = routes;
 
