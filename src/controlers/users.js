@@ -1,13 +1,13 @@
 const knex = require('../connection');
 const bcrypt = require('bcrypt');
-const regiterUserSchema = require('../yup_validations/registerUserSchema');
+const registerUserSchema = require('../yup_validations/registerUserSchema');
 
 const registerUser = async (req, res) => {
   const { nome, email, senha } = req.body;
 
   try {
 
-    await regiterUserSchema.validate(req.body);
+    await registerUserSchema.validate(req.body);
 
     const user = await knex('users').where({ email }).first();
 
@@ -39,15 +39,11 @@ const home = async (req, res) => {
 
   try {
     const clients = await knex('clients').where({ user_id: user.id });
-    // const charges = await knex('charges').where({ user_id: user.id });
 
     if (!clients) {
       return res.status(404).json("Não há clientes cadastrados");
     };
 
-    // if(!charges) {
-    //   return res.status(404).json("Não há cobranças cadastradas");
-    // };
 
     return res.status(200).json({ clients, charges });
 
@@ -64,9 +60,7 @@ const updateUser = async (req, res) => {
   const { nome, email, senha, cpf, telefone } = req.body;
   const { user } = req;
 
-  if (!nome && !email && !senha && !cpf && !telefone) {
-    return res.status(404).json('É obrigatório informar ao menos um campo para atualização');
-  }
+  await registerUserSchema.validate(req.body);
 
   try {
 
