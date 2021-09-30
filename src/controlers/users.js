@@ -44,8 +44,7 @@ const home = async (req, res) => {
       return res.status(404).json("Não há clientes cadastrados");
     };
 
-
-    return res.status(200).json({ clients, charges });
+    return res.status(200).json(clients);
 
   } catch (error) {
     return res.status(400).json(error.message)
