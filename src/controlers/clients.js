@@ -15,11 +15,18 @@ const registerClient = async (req, res) => {
       return res.status(400).json("Email já cadastrado")
     };
 
-    const existedCpf = await knex('users').where({ cpf }).first();
-
-    if (existedCpf) {
-      return res.status(400).json("Cpf já cadastrado");
-    };
+    if(!isNaN(cpf)){
+      
+      if(cpf.length !== 11){
+        return res.status(400).json('Insira um cpf válido e sem pontuações')
+      }
+  
+      const existedCpf = await knex('users').where({ cpf }).first();
+  
+      if (existedCpf) {
+        return res.status(400).json("Cpf já cadastrado");
+      };
+    }
 
     const registeredClient = await knex('clients').insert({
       user_id: user.id,
