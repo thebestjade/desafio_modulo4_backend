@@ -66,11 +66,19 @@ const updateUser = async (req, res) => {
       senha = await bcrypt.hash(senha, 10);
     }
 
-    if (email && email !== user.email) {
+    if (email !== user.email) {
       const existedEmail = await knex('users').where({ email }).first();
 
       if (existedEmail) {
         return res.status(400).json("Email já cadastrado");
+      }
+    };
+
+    if (cpf && cpf !== user.cpf) {
+      const existedCpf = await knex('users').where({ cpf }).first();
+
+      if (existedCpf) {
+        return res.status(400).json("Cpf já cadastrado");
       }
     };
 
