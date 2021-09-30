@@ -56,7 +56,7 @@ const profile = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const { nome, email, senha, cpf, telefone } = req.body;
+  let { nome, email, senha, cpf, telefone } = req.body;
   const { user } = req;
 
   try {
