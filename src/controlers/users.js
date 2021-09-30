@@ -1,6 +1,7 @@
 const knex = require('../connection');
 const bcrypt = require('bcrypt');
 const registerUserSchema = require('../yup_validations/registerUserSchema');
+const cpfValidation = require('../utils/cpfValidation');
 
 const registerUser = async (req, res) => {
   const { nome, email, senha } = req.body;
@@ -74,17 +75,7 @@ const updateUser = async (req, res) => {
       }
     };
 
-    if(cpf && isNaN(cpf)){
-      return res.status(400).json('O cpf deve conter apenas números, sem pontuações')
-    }
-
-    if(cpf && cpf.length !== 11){
-      return res.status(400).json('O cpf deve conter 11 caracteres')
-    }
-
-    if(cpf && cpf.includes(".")){
-      return res.status(400).json('Insira um cpf válido e sem pontuações')
-    }
+    cpfValidation(cpf, res);
 
     if (cpf && cpf !== user.cpf) {
       

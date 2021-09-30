@@ -1,5 +1,6 @@
 const knex = require('../connection');
 const registerClientSchema = require('../yup_validations/registerClientSchema');
+const cpfValidation = require('../utils/cpfValidation');
 
 const registerClient = async (req, res) => {
   const { user } = req;
@@ -15,17 +16,7 @@ const registerClient = async (req, res) => {
       return res.status(400).json("Email já cadastrado")
     };
 
-    if(isNaN(cpf)){
-      return res.status(400).json('O cpf deve conter apenas números, sem pontuações')
-    }
-
-    if(cpf.length !== 11){
-      return res.status(400).json('O cpf deve conter 11 caracteres')
-    }
-
-    if(cpf.includes(".")){
-      return res.status(400).json('Insira um cpf válido e sem pontuações')
-    }
+    cpfValidation(cpf, res);
 
     const existedCpf = await knex('users').where({ cpf }).first();
 
