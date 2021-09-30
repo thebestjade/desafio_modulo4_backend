@@ -67,7 +67,7 @@ const updateUser = async (req, res) => {
     }
 
     if (email && email !== user.email) {
-      const existedEmail = await knex('users').where({ email }).frist();
+      const existedEmail = await knex('users').where({ email }).first();
 
       if (existedEmail) {
         return res.status(400).json("Email já cadastrado");
