@@ -59,9 +59,8 @@ const updateUser = async (req, res) => {
   const { nome, email, senha, cpf, telefone } = req.body;
   const { user } = req;
 
-  await registerUserSchema.validate(req.body);
-
   try {
+    await registerUserSchema.validate(req.body);
 
     if (senha) {
       senha = await bcrypt.hash(senha, 10);
