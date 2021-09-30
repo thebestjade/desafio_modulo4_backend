@@ -15,7 +15,7 @@ create table clients (
   name text not null,
   email text not null unique,
   cpf text not null unique,
-  phone text not null unique,
+  phone text not null,
   cep text,
   public_place text,
   complement text,
