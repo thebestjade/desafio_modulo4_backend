@@ -74,11 +74,16 @@ const updateUser = async (req, res) => {
       }
     };
 
-    if (cpf && !isNaN(cpf) && cpf !== user.cpf) {
+    if(cpf && isNaN(cpf)){
+      return res.status(400).json('O cpf deve conter números')
+    }
+
+    if(cpf && cpf.length !== 11){
+      return res.status(400).json('Insira um cpf válido e sem pontuações')
+    }
+
+    if (cpf && cpf !== user.cpf) {
       
-      if(cpf.length !== 11){
-        return res.status(400).json('Insira um cpf válido e sem pontuações')
-      }
       const existedCpf = await knex('users').where({ cpf }).first();
 
       if (existedCpf) {
