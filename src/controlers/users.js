@@ -75,10 +75,14 @@ const updateUser = async (req, res) => {
     };
 
     if(cpf && isNaN(cpf)){
-      return res.status(400).json('O cpf deve conter números')
+      return res.status(400).json('O cpf deve conter apenas números, sem pontuações')
     }
 
     if(cpf && cpf.length !== 11){
+      return res.status(400).json('O cpf deve conter 11 caracteres')
+    }
+
+    if(cpf && cpf.includes(".")){
       return res.status(400).json('Insira um cpf válido e sem pontuações')
     }
 
