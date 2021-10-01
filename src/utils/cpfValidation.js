@@ -1,4 +1,4 @@
-function cpfValidation(cpf, res) {
+function cpfValidation(cpf) {
 
   let isTrue = true;
   let messageError = '';
@@ -13,7 +13,7 @@ function cpfValidation(cpf, res) {
 
   if (cpf.length !== 11) {
     isTrue = false;
-    messageError ='O cpf deve conter 11 caracteres';
+    messageError = 'O cpf deve conter 11 caracteres';
 
     return { isTrue, messageError };
   }

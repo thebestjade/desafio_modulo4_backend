@@ -16,9 +16,9 @@ const registerClient = async (req, res) => {
       return res.status(400).json("Você já possui um cliente cadastrado com este email")
     };
 
-    const {isTrue, messageError } = cpfValidation(cpf, res);
+    const { isTrue, messageError } = cpfValidation(cpf);
 
-    if(!isTrue){
+    if (!isTrue) {
       return res.status(400).json(messageError)
     }
 

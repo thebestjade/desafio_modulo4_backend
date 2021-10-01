@@ -75,10 +75,14 @@ const updateUser = async (req, res) => {
       }
     };
 
-    cpfValidation(cpf, res);
+    const { isTrue, messageError } = cpfValidation(cpf);
+
+    if (!isTrue) {
+      return res.status(400).json(messageError);
+    }
 
     if (cpf && cpf !== user.cpf) {
-      
+
       const existedCpf = await knex('users').where({ cpf }).first();
 
       if (existedCpf) {
@@ -94,7 +98,7 @@ const updateUser = async (req, res) => {
       phone: telefone
     });
 
-    if(!updatedUser){
+    if (!updatedUser) {
       return res.status(400).json("Não foi possível atualizar o usuário");
     }
 
