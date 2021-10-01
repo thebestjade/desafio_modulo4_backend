@@ -1,20 +1,38 @@
 function cpfValidation(cpf, res) {
 
-  if(isNaN(cpf)){
-    return res.status(400).json('O cpf deve conter apenas números, sem pontuações')
+  let isTrue = true;
+  let messageError = '';
+
+  if (isNaN(cpf)) {
+
+    isTrue = false;
+    messageError = 'O cpf deve conter apenas números, sem pontuações';
+
+    return { isTrue, messageError };
   }
 
-  if(cpf.length !== 11){
-    return res.status(400).json('O cpf deve conter 11 caracteres')
+  if (cpf.length !== 11) {
+    isTrue = false;
+    messageError ='O cpf deve conter 11 caracteres';
+
+    return { isTrue, messageError };
   }
 
-  if(cpf.includes(".")){
-    return res.status(400).json('Insira um cpf válido e sem pontuações')
+  if (cpf.includes(".")) {
+    isTrue = false;
+    messageError = 'Insira um cpf válido e sem pontuações';
+
+    return { isTrue, messageError };
   }
 
-  if(cpf.includes("e")){
-    return res.status(400).json('O cpf deve conter apenas números, sem pontuações')
+  if (cpf.includes("e")) {
+    isTrue = false;
+    messageError = 'O cpf deve conter apenas números, sem pontuações';
+
+    return { isTrue, messageError };
   }
+
+  return { isTrue, messageError };
 }
 
 

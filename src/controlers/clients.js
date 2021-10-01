@@ -16,7 +16,11 @@ const registerClient = async (req, res) => {
       return res.status(400).json("Você já possui um cliente cadastrado com este email")
     };
 
-    cpfValidation(cpf, res);
+    const {isTrue, messageError } = cpfValidation(cpf, res);
+
+    if(!isTrue){
+      return res.status(400).json(messageError)
+    }
 
     const existedCpf = await knex('clients').where({ cpf }).first();
 
