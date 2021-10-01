@@ -11,8 +11,8 @@ routes.post('/login', login);
 
 routes.use(tokenValidation);
 
-routes.get('/home', users.home);
-routes.get('/profile', users.profile);
+routes.get('/', users.home);
+routes.get('/perfil', users.profile);
 routes.put('/editarUsuario', users.updateUser);
 routes.post('/cadastrarCliente', clients.registerClient);
 
