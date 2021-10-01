@@ -13,15 +13,15 @@ const registerClient = async (req, res) => {
     const client = await knex('clients').where({ email }).first();
 
     if (client) {
-      return res.status(400).json("Email já cadastrado")
+      return res.status(400).json("Você já possui um cliente cadastrado com este email")
     };
 
     cpfValidation(cpf, res);
 
-    const existedCpf = await knex('users').where({ cpf }).first();
+    const existedCpf = await knex('clients').where({ cpf }).first();
 
     if (existedCpf) {
-      return res.status(400).json("Cpf já cadastrado");
+      return res.status(400).json("Você já possui um cliente cadastrado com este cpf");
     };
 
     const registeredClient = await knex('clients').insert({

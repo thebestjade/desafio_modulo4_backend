@@ -25,7 +25,7 @@ const registerUser = async (req, res) => {
     });
 
     if (!registeredUser) {
-      return res.status(400).json("O usuário não pôde ser cadastrado");
+      return res.status(400).json("Não foi possível cadastrar este usuário");
     }
 
     return res.status(200).json("Usuário cadastrado com sucesso");
