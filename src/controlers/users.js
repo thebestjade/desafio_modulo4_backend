@@ -65,7 +65,9 @@ const updateUser = async (req, res) => {
     await updateUserSchema.validate(req.body);
 
     if (senha) {
-      senha = await bcrypt.hash(senha, 10);
+      if(senha.length >= 5){
+        senha = await bcrypt.hash(senha, 10);
+      }
     }
 
     if (email !== user.email) {
