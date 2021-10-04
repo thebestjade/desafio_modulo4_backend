@@ -1,6 +1,7 @@
 const knex = require('../connection');
 const bcrypt = require('bcrypt');
 const registerUserSchema = require('../yup_validations/registerUserSchema');
+const updateUserSchema = require('../yup_validations/updateUserSchema');
 const cpfValidation = require('../utils/cpfValidation');
 
 const registerUser = async (req, res) => {
@@ -61,7 +62,7 @@ const updateUser = async (req, res) => {
   const { user } = req;
 
   try {
-    await registerUserSchema.validate(req.body);
+    await updateUserSchema.validate(req.body);
 
     if (senha) {
       senha = await bcrypt.hash(senha, 10);
