@@ -1,5 +1,6 @@
 const knex = require('../connection');
 const registerClientSchema = require('../yup_validations/registerClientSchema');
+const cpfValidation = require('../utils/cpfValidation');
 
 const registerClient = async (req, res) => {
   const { user } = req;
@@ -12,8 +13,20 @@ const registerClient = async (req, res) => {
     const client = await knex('clients').where({ email }).first();
 
     if (client) {
-      return res.status(400).json("Cliente já cadastrado")
+      return res.status(400).json("Você já possui um cliente cadastrado com este email")
+    };
+
+    const { isTrue, messageError } = cpfValidation(cpf);
+
+    if (!isTrue) {
+      return res.status(400).json(messageError)
     }
+
+    const existedCpf = await knex('clients').where({ cpf }).first();
+
+    if (existedCpf) {
+      return res.status(400).json("Você já possui um cliente cadastrado com este cpf");
+    };
 
     const registeredClient = await knex('clients').insert({
       user_id: user.id,
@@ -27,13 +40,13 @@ const registerClient = async (req, res) => {
       district: bairro,
       city: cidade,
       uf: estado
-    }).returning('*');
+    });
 
     if (!registeredClient) {
       return res.status(400).json("Não foi possível cadastrar o cliente")
     }
 
-    return res.status(200).json("Cliente cadstrado com sucesso");
+    return res.status(200).json("Cliente cadastrado com sucesso");
   } catch (error) {
     return res.status(400).json(error.message)
   }

@@ -1,13 +1,15 @@
 const knex = require('../connection');
 const bcrypt = require('bcrypt');
-const regiterUserSchema = require('../yup_validations/registerUserSchema');
+const registerUserSchema = require('../yup_validations/registerUserSchema');
+const updateUserSchema = require('../yup_validations/updateUserSchema');
+const cpfValidation = require('../utils/cpfValidation');
 
 const registerUser = async (req, res) => {
   const { nome, email, senha } = req.body;
 
   try {
 
-    await regiterUserSchema.validate(req.body);
+    await registerUserSchema.validate(req.body);
 
     const user = await knex('users').where({ email }).first();
 
@@ -24,7 +26,7 @@ const registerUser = async (req, res) => {
     });
 
     if (!registeredUser) {
-      return res.status(400).json("O usuário não pôde ser cadastrado");
+      return res.status(400).json("Não foi possível cadastrar este usuário");
     }
 
     return res.status(200).json("Usuário cadastrado com sucesso");
@@ -39,17 +41,12 @@ const home = async (req, res) => {
 
   try {
     const clients = await knex('clients').where({ user_id: user.id });
-    // const charges = await knex('charges').where({ user_id: user.id });
 
     if (!clients) {
       return res.status(404).json("Não há clientes cadastrados");
     };
 
-    // if(!charges) {
-    //   return res.status(404).json("Não há cobranças cadastradas");
-    // };
-
-    return res.status(200).json({ clients, charges });
+    return res.status(200).json(clients);
 
   } catch (error) {
     return res.status(400).json(error.message)
@@ -61,36 +58,58 @@ const profile = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const { nome, email, senha, cpf, telefone } = req.body;
+  let { nome, email, senha, cpf, telefone } = req.body;
+  let updatedUserPassword;
   const { user } = req;
 
-  if (!nome && !email && !senha && !cpf && !telefone) {
-    return res.status(404).json('É obrigatório informar ao menos um campo para atualização');
-  }
-
   try {
+    await updateUserSchema.validate(req.body);
 
-    if (senha) {
-      senha = await bcrypt.hash(senha, 10);
-    }
-
-    if (email && email !== user.email) {
-      const existedEmail = await knex('users').where({ email }).frist();
-
+    
+    if (email !== user.email) {
+      const existedEmail = await knex('users').where({ email }).first();
+      
       if (existedEmail) {
         return res.status(400).json("Email já cadastrado");
       }
     };
+    
+    const { isTrue, messageError } = cpfValidation(cpf);
+    
+    if (!isTrue) {
+      return res.status(400).json(messageError);
+    }
+    
+    if (cpf && cpf !== user.cpf) {
+      
+      const existedCpf = await knex('users').where({ cpf }).first();
+      
+      if (existedCpf) {
+        return res.status(400).json("Cpf já cadastrado");
+      }
+    };
+    
+    if (senha && senha.length >= 5) {
+      senha = await bcrypt.hash(senha, 10);
+
+      updatedUserPassword = await knex('users').where({ id: user.id }).update({
+        password: senha
+      });
+
+      if (!updatedUser) {
+        return res.status(400).json("Não foi possível atualizar a senha do usuário");
+      }
+
+    }
 
     const updatedUser = await knex('users').where({ id: user.id }).update({
       name: nome,
       email,
-      password: senha,
-      cpf,
-      phone: telefone
+      phone: telefone,
+      cpf
     });
 
-    if(!updatedUser){
+    if (!updatedUser) {
       return res.status(400).json("Não foi possível atualizar o usuário");
     }
 
