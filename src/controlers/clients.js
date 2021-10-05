@@ -52,24 +52,82 @@ const registerClient = async (req, res) => {
   }
 };
 
-const listClients = async (req, res)=> {
+const listClients = async (req, res) => {
   const { user } = req;
 
   try {
-    
+
   } catch (error) {
     return res.status(400).json(error.message)
   }
 };
 
-const clientDetails = async (req, res) =>{
+const clientDetails = async (req, res) => {
 
 };
 
 const updateClient = async (req, res) => {
+  const { nome, email, cpf, telefone, cep, logradouro, complemento, bairro, cidade, estado
+  } = req.body;
+  const { user } = req;
+  const { clienteId } = req.params;
 
+  try {
+    await registerClientSchema.validate(req.body);
+
+    const client = await knex('clients').where({ user_id: user.id }).where({ id: clienteId }).first();
+
+    if (!client){
+      return res.status(400).json("Cliente não cadastrado");
+    }
+    
+
+    if (email !== client.email) {
+      const existedEmail = await knex('clients').where({ email }).first();
+
+      if (existedEmail) {
+        return res.status(400).json("Email já cadastrado");
+      }
+    };
+
+    if (cpf !== client.cpf) {
+
+      const { isTrue, messageError } = cpfValidation(cpf);
+
+      if (!isTrue) {
+        return res.status(400).json(messageError);
+      }
+
+      const existedCpf = await knex('clients').where({ cpf }).first();
+
+      if (existedCpf) {
+        return res.status(400).json("Cpf já cadastrado");
+      }
+    };
+
+    const updatedClient = await knex('clients').where({ id: clienteId }).update({
+      name: nome,
+      email,
+      phone: telefone,
+      cpf,
+      cep,
+      public_place: logradouro,
+      complement: complemento,
+      district: bairro,
+      city: cidade,
+      uf: estado
+    });
+
+    if (!updatedClient) {
+      return res.status(400).json("Não foi possível atualizar o cliente");
+    }
+
+    return res.status(200).json("Cliente atualizado com sucesso")
+
+  } catch (error) {
+    return res.status(400).json(error.message)
+  }
 }
-
 module.exports = {
   registerClient,
   listClients,
