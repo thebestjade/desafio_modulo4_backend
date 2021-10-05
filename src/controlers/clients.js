@@ -52,6 +52,27 @@ const registerClient = async (req, res) => {
   }
 };
 
+const listClients = async (req, res)=> {
+  const { user } = req;
+
+  try {
+    
+  } catch (error) {
+    return res.status(400).json(error.message)
+  }
+};
+
+const clientDetails = async (req, res) =>{
+
+};
+
+const updateClient = async (req, res) => {
+
+}
+
 module.exports = {
-  registerClient
+  registerClient,
+  listClients,
+  clientDetails,
+  updateClient
 };
