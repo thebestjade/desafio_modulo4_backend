@@ -74,13 +74,13 @@ const updateUser = async (req, res) => {
       }
     };
     
-    const { isTrue, messageError } = cpfValidation(cpf);
-    
-    if (!isTrue) {
-      return res.status(400).json(messageError);
-    }
-    
     if (cpf && cpf !== user.cpf) {
+
+      const { isTrue, messageError } = cpfValidation(cpf);
+      
+      if (!isTrue) {
+        return res.status(400).json(messageError);
+      }
       
       const existedCpf = await knex('users').where({ cpf }).first();
       
@@ -89,15 +89,19 @@ const updateUser = async (req, res) => {
       }
     };
     
-    if (senha && senha.length >= 5) {
-      senha = await bcrypt.hash(senha, 10);
-
-      updatedUserPassword = await knex('users').where({ id: user.id }).update({
-        password: senha
-      });
-
-      if (!updatedUser) {
-        return res.status(400).json("Não foi possível atualizar a senha do usuário");
+    if (senha) {
+      if(senha.length >= 5){
+        senha = await bcrypt.hash(senha, 10);
+  
+        updatedUserPassword = await knex('users').where({ id: user.id }).update({
+          password: senha
+        });
+  
+        if (!updatedUserPassword) {
+          return res.status(400).json("Não foi possível atualizar a senha do usuário");
+        }
+      }else{
+        return res.status(400).json("A senha precisa ter no mínimo 5 caracteres");
       }
 
     }
