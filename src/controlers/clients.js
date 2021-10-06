@@ -54,9 +54,17 @@ const registerClient = async (req, res) => {
 
 const listClients = async (req, res) => {
   const { user } = req;
-
+  
   try {
 
+    const clients = await knex('clients').select('name', 'email', 'phone').returning('*');
+
+    if (!clients) {
+      return res.status(400).json("Cliente não cadastrado");
+    }
+
+
+    return res.status(200).json({ clients })
   } catch (error) {
     return res.status(400).json(error.message)
   }
@@ -73,14 +81,14 @@ const clientDetails = async (req, res) => {
       return res.status(400).json("Cliente não cadastrado");
     }
 
-    const clientCharges = await knex('charges').where({client_id: clienteId}).returning('*');
+    const clientCharges = await knex('charges').where({ client_id: clienteId }).returning('*');
 
     if (!clientCharges) {
       return res.status(400).json("O cliente não possui cobranças cadastradas");
     }
 
-    return res.status(200).json({client, clientCharges});
-    
+    return res.status(200).json({ client, clientCharges });
+
   } catch (error) {
     return res.status(400).json(error.message)
   }
