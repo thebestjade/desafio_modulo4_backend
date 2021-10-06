@@ -19,7 +19,7 @@ routes.post('/cadastrarCliente', clients.registerClient);
 routes.get('/clientes', clients.listClients);
 routes.put('/editarCliente/:clienteId', clients.updateClient);
 routes.get('/clientes/:clienteId', clients.clientDetails);
-routes.get('/cobrancas', charges.registerCharges);
+routes.get('/cobrancas', charges.listCharges);
 routes.post('/cadastrarCobranca', charges.registerCharges);
 
 module.exports = routes;
