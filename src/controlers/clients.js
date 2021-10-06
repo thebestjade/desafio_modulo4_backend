@@ -57,7 +57,7 @@ const listClients = async (req, res) => {
   
   try {
 
-    const clients = await knex('clients').select('name', 'email', 'phone').returning('*');
+    const clients = await knex('clients').select('name', 'email', 'phone').where({user_id: user.id}).bodyreturning('*');
 
     if (!clients) {
       return res.status(400).json("Cliente não cadastrado");
