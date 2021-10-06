@@ -23,3 +23,11 @@ create table clients (
   city text,
   uf text
 );
+create table charges (
+  id serial primary key,
+  client_id integer not null references clients (id),
+  description text not null,
+  status text not null,
+  value integer not null,
+  due_date date not null
+);
