@@ -10,7 +10,7 @@ const registerClient = async (req, res) => {
 
     await registerClientSchema.validate(req.body);
 
-    const client = await knex('clients').where({ email }).first();
+    const client = await knex('clients').where({ email }).where({user_id: user.id}).first();
 
     if (client) {
       return res.status(400).json("Você já possui um cliente cadastrado com este email")
@@ -22,7 +22,7 @@ const registerClient = async (req, res) => {
       return res.status(400).json(messageError)
     }
 
-    const existedCpf = await knex('clients').where({ cpf }).first();
+    const existedCpf = await knex('clients').where({ cpf }).where({user_id: user.id}).first();
 
     if (existedCpf) {
       return res.status(400).json("Você já possui um cliente cadastrado com este cpf");
@@ -54,9 +54,17 @@ const registerClient = async (req, res) => {
 
 const listClients = async (req, res) => {
   const { user } = req;
-
+  
   try {
 
+    const clients = await knex('clients').select('name', 'email', 'phone').where({user_id: user.id}).returning('*');
+
+    if (!clients) {
+      return res.status(400).json("Cliente não cadastrado");
+    }
+
+
+    return res.status(200).json({ clients })
   } catch (error) {
     return res.status(400).json(error.message)
   }
@@ -73,14 +81,14 @@ const clientDetails = async (req, res) => {
       return res.status(400).json("Cliente não cadastrado");
     }
 
-    const clientCharges = await knex('charges').where({client_id: clienteId}).returning('*');
+    const clientCharges = await knex('charges').where({ client_id: clienteId }).returning('*');
 
     if (!clientCharges) {
       return res.status(400).json("O cliente não possui cobranças cadastradas");
     }
 
-    return res.status(200).json({client, clientCharges});
-    
+    return res.status(200).json({ client, clientCharges });
+
   } catch (error) {
     return res.status(400).json(error.message)
   }
