@@ -1,5 +1,5 @@
 const knex = require('../connection');
-// const { parse } = require('date-fns');
+// const { format } = require('date-fns');
 const registerChargeSchema = require('../yup_validations/registerChargesSchema');
 
 const registerCharges = async (req, res) => {
@@ -45,6 +45,16 @@ const listCharges = async (req, res) => {
     
     if (!charges) {
       return res.status(400).json("Você não possui cobranças cadastradas")
+    }
+
+    for(let charge of charges){
+      if(charge.status === "pendente"){
+        const convertedDueDate = new Date(charge.due_date).getTime();
+        const todaysDate = new Date().getTime();
+        if(convertedDueDate <  todaysDate){
+          charge.status = "vencido"
+        }
+      }
     }
 
     return res.status(200).json(charges);
