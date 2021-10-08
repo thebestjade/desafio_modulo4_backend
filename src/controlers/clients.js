@@ -10,7 +10,7 @@ const registerClient = async (req, res) => {
 
     await registerClientSchema.validate(req.body);
 
-    const client = await knex('clients').where({ email }).where({user_id: user.id}).first();
+    const client = await knex('clients').where({ email }).where({ user_id: user.id }).first();
 
     if (client) {
       return res.status(400).json("Você já possui um cliente cadastrado com este email")
@@ -22,7 +22,7 @@ const registerClient = async (req, res) => {
       return res.status(400).json(messageError)
     }
 
-    const existedCpf = await knex('clients').where({ cpf }).where({user_id: user.id}).first();
+    const existedCpf = await knex('clients').where({ cpf }).where({ user_id: user.id }).first();
 
     if (existedCpf) {
       return res.status(400).json("Você já possui um cliente cadastrado com este cpf");
@@ -54,15 +54,32 @@ const registerClient = async (req, res) => {
 
 const listClients = async (req, res) => {
   const { user } = req;
-  
+
   try {
 
-    const clients = await knex('clients').select('name', 'email', 'phone').where({user_id: user.id}).returning('*');
+    let clients = await knex('clients')
+      .select('clients.id', 'name', 'email', 'phone', knex.raw('sum(charges.value) as totalCharges'), knex.raw(`sum(case when charges.status = 'pago' then charges.value else 0 end) as totalChargesPaid`))
+      .leftJoin('charges', 'clients.id', 'charges.client_id')
+      .where({ user_id: user.id })
+      .groupBy('clients.id', 'name', 'email', 'phone')
+      .returning('*');
 
-    if (!clients) {
-      return res.status(400).json("Cliente não cadastrado");
+    if (!clients.length) {
+      return res.status(400).json("Você não possui clientes");
     }
 
+    clients = clients.map( async (client) => {
+      const overdueCharge = await knex('charges').where({client_id: client.id, status: "pendente"}).where('due_date', '<', new Date()).count('*').first()
+  
+      if(overdueCharge.count > 0){
+        client.status = "inadimplente"
+      }else{
+        client.status = "em_dia"
+      }
+      return client
+    })
+    
+    clients = await Promise.all(clients)
 
     return res.status(200).json({ clients })
   } catch (error) {
