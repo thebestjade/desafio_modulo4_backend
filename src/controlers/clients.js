@@ -1,10 +1,10 @@
 const knex = require('../connection');
 const registerClientSchema = require('../yup_validations/registerClientSchema');
-const cpfValidation = require('../utils/cpfValidation');
+const formateValidation = require('../utils/formateValidation');
 
 const registerClient = async (req, res) => {
   const { user } = req;
-  const { nome, email, cpf, telefone, cep, logradouro, complemento, bairro, cidade, estado } = req.body;
+  let { nome, email, cpf, telefone, cep, logradouro, complemento, bairro, cidade, estado } = req.body;
 
   try {
 
@@ -16,17 +16,25 @@ const registerClient = async (req, res) => {
       return res.status(400).json("Você já possui um cliente cadastrado com este email")
     };
 
-    const { isTrue, messageError } = cpfValidation(cpf);
+    cpf = cpf.replace(/\D/g, '');
+    let { isTrue: cpfIsTrue, messageError: cpfMessageError } = formateValidation(cpf);
+
+    if (!cpfIsTrue) {
+      return res.status(400).json(cpfMessageError)
+    }
+    
+    const existedCpf = await knex('clients').where({ cpf }).where({ user_id: user.id }).first();
+    
+    if (existedCpf) {
+      return res.status(400).json("Você já possui um cliente cadastrado com este cpf");
+    };
+    
+    telefone = telefone.replace(/\D/g, '');
+    let { isTrue, messageError } = formateValidation(telefone);
 
     if (!isTrue) {
       return res.status(400).json(messageError)
     }
-
-    const existedCpf = await knex('clients').where({ cpf }).where({ user_id: user.id }).first();
-
-    if (existedCpf) {
-      return res.status(400).json("Você já possui um cliente cadastrado com este cpf");
-    };
 
     const registeredClient = await knex('clients').insert({
       user_id: user.id,
@@ -58,7 +66,7 @@ const listClients = async (req, res) => {
   try {
 
     let clients = await knex('clients')
-      .select('clients.id', 'name', 'email', 'phone', knex.raw('sum(charges.value) as totalCharges'), knex.raw(`sum(case when charges.status = 'pago' then charges.value else 0 end) as totalChargesPaid`))
+      .select('clients.id', 'name', 'email', 'phone', knex.raw('sum(charges.value) as totalCharges'), knex.raw(`sum(case when charges.status = 'pago' then charges.value else null end) as totalChargesPaid`))
       .leftJoin('charges', 'clients.id', 'charges.client_id')
       .where({ user_id: user.id })
       .groupBy('clients.id', 'name', 'email', 'phone')
@@ -113,7 +121,7 @@ const clientDetails = async (req, res) => {
 };
 
 const updateClient = async (req, res) => {
-  const { nome, email, cpf, telefone, cep, logradouro, complemento, bairro, cidade, estado
+  let { nome, email, cpf, telefone, cep, logradouro, complemento, bairro, cidade, estado
   } = req.body;
   const { user } = req;
   const { clienteId } = req.params;
@@ -129,25 +137,38 @@ const updateClient = async (req, res) => {
     await registerClientSchema.validate(req.body);
 
     if (email !== client.email) {
-      const existedEmail = await knex('clients').where({ email }).first();
+      const existedEmail = await knex('clients').where({ email }).where({ user_id: user.id }).first();
 
       if (existedEmail) {
         return res.status(400).json("Email já cadastrado");
       }
     };
+    
+    cpf = cpf.replace(/\D/g, '');
 
     if (cpf !== client.cpf) {
 
-      const { isTrue, messageError } = cpfValidation(cpf);
+      let { isTrue: cpfIsTrue, messageError: cpfMessageError } = formateValidation(cpf);
 
-      if (!isTrue) {
-        return res.status(400).json(messageError);
+      if (!cpfIsTrue) {
+        return res.status(400).json(cpfMessageError);
       }
 
-      const existedCpf = await knex('clients').where({ cpf }).first();
+      const existedCpf = await knex('clients').where({ cpf }).where({ user_id: user.id }).first();
 
       if (existedCpf) {
         return res.status(400).json("Cpf já cadastrado");
+      }
+    };
+    
+    telefone = telefone.replace(/\D/g, '');
+
+    if (telefone !== client.phone) {
+
+      let { isTrue, messageError } = formateValidation(telefone);
+
+      if (!isTrue) {
+        return res.status(400).json(messageError);
       }
     };
 
