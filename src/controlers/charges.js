@@ -1,5 +1,4 @@
 const knex = require('../connection');
-// const { format } = require('date-fns');
 const registerChargeSchema = require('../yup_validations/registerChargesSchema');
 
 const registerCharges = async (req, res) => {
@@ -16,15 +15,15 @@ const registerCharges = async (req, res) => {
 
     await registerChargeSchema.validate(req.body);
 
-    const regex = /[,|.]/g;
-    const convertedValue = Number(valor.replaceAll(regex,''));
+    const regexValue = /[,|.]/g;
+    const convertedValue = Number(valor.replaceAll(regexValue,''));
 
     const registeredCharge = await knex('charges').insert({
       client_id: clienteId,
       description: descricao,
       status,
       value: convertedValue,
-      due_date: vencimento
+      due_date: convertedDate
     });
 
     if (!registeredCharge) {
@@ -50,7 +49,10 @@ const listCharges = async (req, res) => {
     for(let charge of charges){
       if(charge.status === "pendente"){
         const convertedDueDate = new Date(charge.due_date).getTime();
-        const todaysDate = new Date().getTime();
+        const day = new Date().getDate();
+        const month = new Date().getMonth();
+        const year = new Date().getFullYear();
+        const todaysDate = new Date(year, month, day).getTime();
         if(convertedDueDate <  todaysDate){
           charge.status = "vencido"
         }
