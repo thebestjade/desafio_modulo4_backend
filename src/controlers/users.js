@@ -2,7 +2,7 @@ const knex = require('../connection');
 const bcrypt = require('bcrypt');
 const registerUserSchema = require('../yup_validations/registerUserSchema');
 const updateUserSchema = require('../yup_validations/updateUserSchema');
-const cpfValidation = require('../utils/cpfValidation');
+const formateValidation = require('../utils/formateValidation');
 
 const registerUser = async (req, res) => {
   const { nome, email, senha } = req.body;
@@ -65,7 +65,6 @@ const updateUser = async (req, res) => {
   try {
     await updateUserSchema.validate(req.body);
 
-    
     if (email !== user.email) {
       const existedEmail = await knex('users').where({ email }).first();
       
@@ -74,18 +73,33 @@ const updateUser = async (req, res) => {
       }
     };
     
-    if (cpf && cpf !== user.cpf) {
-
-      const { isTrue, messageError } = cpfValidation(cpf);
+    if(cpf){
+      cpf = cpf.replace(/\D/g, '');
+      
+      const { isTrue, messageError } = formateValidation(cpf);
       
       if (!isTrue) {
         return res.status(400).json(messageError);
       }
+  
+      if (cpf !== user.cpf) {
+  
+        const existedCpf = await knex('users').where({ cpf }).first();
+        
+        if (existedCpf) {
+          return res.status(400).json("Cpf já cadastrado");
+        }
+      };
+    }
+    
+    if (telefone) {
+
+      telefone = telefone.replace(/\D/g, '');
       
-      const existedCpf = await knex('users').where({ cpf }).first();
+      const { isTrue, messageError } = formateValidation(telefone);
       
-      if (existedCpf) {
-        return res.status(400).json("Cpf já cadastrado");
+      if (!isTrue) {
+        return res.status(400).json(messageError);
       }
     };
     

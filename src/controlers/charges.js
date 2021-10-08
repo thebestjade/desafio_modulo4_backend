@@ -15,15 +15,14 @@ const registerCharges = async (req, res) => {
 
     await registerChargeSchema.validate(req.body);
 
-    const regexValue = /[,|.]/g;
-    const convertedValue = Number(valor.replaceAll(regexValue,''));
+    const convertedValue = Number(valor.replace(/\D/g, ''));
 
     const registeredCharge = await knex('charges').insert({
       client_id: clienteId,
       description: descricao,
       status,
       value: convertedValue,
-      due_date: convertedDate
+      due_date: vencimento
     });
 
     if (!registeredCharge) {
@@ -40,20 +39,23 @@ const listCharges = async (req, res) => {
   const { user } = req;
 
   try {
-    const charges = await knex('charges').select('charges.id', 'clients.name', 'charges.description', 'charges.value', 'charges.status', 'charges.due_date').leftJoin('clients', 'charges.client_id', 'clients.id').where({user_id: user.id})
-    
-    if (!charges) {
+    const charges = await knex('charges')
+      .select('charges.id', 'clients.name', 'charges.description', 'charges.value', 'charges.status', 'charges.due_date')
+      .leftJoin('clients', 'charges.client_id', 'clients.id')
+      .where({ user_id: user.id });
+
+    if (!charges.length) {
       return res.status(400).json("Você não possui cobranças cadastradas")
     }
 
-    for(let charge of charges){
-      if(charge.status === "pendente"){
+    for (let charge of charges) {
+      if (charge.status === "pendente") {
         const convertedDueDate = new Date(charge.due_date).getTime();
         const day = new Date().getDate();
         const month = new Date().getMonth();
         const year = new Date().getFullYear();
         const todaysDate = new Date(year, month, day).getTime();
-        if(convertedDueDate <  todaysDate){
+        if (convertedDueDate < todaysDate) {
           charge.status = "vencido"
         }
       }
