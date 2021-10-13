@@ -47,9 +47,11 @@ const listCharges = async (req, res) => {
     }
 
     for (let charge of charges) {
-      if (charge.status === "pendente") {
+      if (charge.status.toLowerCase() === "pendente") {
+ 
         const convertedDueDate = new Date(charge.due_date).getTime();
         const todaysDate = new Date().getTime();
+        
         if (convertedDueDate < todaysDate) {
           charge.status = "vencido"
         }
