@@ -13,8 +13,8 @@ create table clients (
   id serial primary key,
   user_id integer not null references users (id),
   name text not null,
-  email text not null unique,
-  cpf text not null unique,
+  email text not null,
+  cpf text not null,
   phone text not null,
   cep text,
   public_place text,
@@ -22,4 +22,12 @@ create table clients (
   district text,
   city text,
   uf text
+);
+create table charges (
+  id serial primary key,
+  client_id integer not null references clients (id),
+  description text not null,
+  status text not null,
+  value integer not null,
+  due_date date not null
 );
