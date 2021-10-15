@@ -6,7 +6,7 @@ const registerCharges = async (req, res) => {
   const { clienteId, descricao, status, valor, vencimento } = req.body;
 
   try {
-
+    
     const client = await knex('clients').where({ user_id: user.id }).where({ id: clienteId }).first();
 
     if (!client) {
@@ -14,7 +14,7 @@ const registerCharges = async (req, res) => {
     }
 
     await registerChargeSchema.validate(req.body);
-    const convertedValue = valor.replace(".", '').replace(",",".")
+    const convertedValue = valor.replace(".", '').replace(",",".");
     const registeredCharge = await knex('charges').insert({
       client_id: clienteId,
       description: descricao,
@@ -35,9 +35,10 @@ const registerCharges = async (req, res) => {
 };
 const listCharges = async (req, res) => {
   const { user } = req;
+  const { status } = req.query;
 
   try {
-    const charges = await knex('charges')
+    let charges = await knex('charges')
       .select('charges.id', 'clients.name', 'charges.description', 'charges.value', 'charges.status', 'charges.due_date')
       .leftJoin('clients', 'charges.client_id', 'clients.id')
       .where({ user_id: user.id });
@@ -58,13 +59,116 @@ const listCharges = async (req, res) => {
       }
     }
 
+    if(status){
+      charges = charges.filter(charge => charge.status === status)
+    }
+
     return res.status(200).json(charges);
   } catch (error) {
     return res.status(400).json(error.message)
   }
 };
 
+const chargeDetails = async (req, res) => {
+  const { cobrancaId } = req.params;
+  const { user } = req;
+
+  try {
+    const charge = await knex('charges')
+      .select('charges.id', 'clients.name', 'charges.description', 'charges.value', 'charges.status', 'charges.due_date')
+      .leftJoin('clients', 'charges.client_id', 'clients.id')
+      .where({ user_id: user.id }).where('charges.id', cobrancaId).first();
+
+    if (!charge) {
+      return res.status(400).json("Cobrança não cadastrada");
+    }
+
+    return res.status(200).json(charge);
+
+  } catch (error) {
+    return res.status(400).json(error.message)
+  }
+
+}
+
+const updateCharge = async (req, res) => {
+  let { clienteId, descricao, status, valor, vencimento } = req.body;
+  const { cobrancaId } = req.params;
+  const { user } = req;
+
+  try {
+
+    const charge = await knex('charges')
+      .select('charges.id', 'clients.name', 'charges.description', 'charges.value', 'charges.status', 'charges.due_date')
+      .leftJoin('clients', 'charges.client_id', 'clients.id')
+      .where({ user_id: user.id }).where('charges.id', cobrancaId).first();
+
+    if (!charge) {
+      return res.status(400).json("Cobrança não cadastrada");
+    }
+
+    await registerChargeSchema.validate(req.body);
+
+    const client = await knex('clients').where({ user_id: user.id }).where({ id: clienteId }).first();
+
+    if (!client) {
+      return res.status(400).json("Cliente não cadastrado");
+    }
+
+    const convertedValue = Number(valor.replace(/\D/g, ''));
+
+    const updatedCharge = await knex('charges').where({ id: cobrancaId }).update({
+      client_id: clienteId,
+      description: descricao,
+      status,
+      value: convertedValue,
+      due_date: vencimento
+    });
+
+    if (!updatedCharge) {
+      return res.status(400).json("Não foi possível atualizar a cobrança");
+    }
+
+    return res.status(200).json("Cobrança atualizada com sucesso");
+
+  } catch (error) {
+    return res.status(400).json(error.message)
+  }
+
+};
+
+const deleteCharge = async (req, res) => {
+  const { cobrancaId } = req.params;
+  const { user } = req;
+
+  try {
+
+    const charge = await knex('charges')
+      .select('charges.id', 'clients.name', 'charges.description', 'charges.value', 'charges.status', 'charges.due_date')
+      .leftJoin('clients', 'charges.client_id', 'clients.id')
+      .where({ user_id: user.id }).where('charges.id', cobrancaId).first();
+
+    if (!charge) {
+      return res.status(400).json("Cobrança não cadastrada");
+    }
+
+    const deletedCharge = await knex('charges').del().where({ id: cobrancaId });
+
+    if (!deletedCharge) {
+      return res.status(400).json("Não foi possível deletar a cobrança");
+    }
+
+    return res.status(200).json("Cobrança deletada com sucesso");
+
+  } catch (error) {
+    return res.status(400).json(error.message)
+  }
+}
+
 module.exports = {
   registerCharges,
-  listCharges
+  listCharges,
+  updateCharge,
+  chargeDetails,
+  deleteCharge
 }
