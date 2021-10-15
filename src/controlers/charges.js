@@ -14,7 +14,7 @@ const registerCharges = async (req, res) => {
     }
 
     await registerChargeSchema.validate(req.body);
-
+    const convertedValue = valor.replace(".", '').replace(",",".");
     const registeredCharge = await knex('charges').insert({
       client_id: clienteId,
       description: descricao,
@@ -48,12 +48,11 @@ const listCharges = async (req, res) => {
     }
 
     for (let charge of charges) {
-      if (charge.status === "pendente") {
+      if (charge.status.toLowerCase() === "pendente") {
+ 
         const convertedDueDate = new Date(charge.due_date).getTime();
-        const day = new Date().getDate();
-        const month = new Date().getMonth();
-        const year = new Date().getFullYear();
-        const todaysDate = new Date(year, month, day).getTime();
+        const todaysDate = new Date().getTime();
+        
         if (convertedDueDate < todaysDate) {
           charge.status = "vencido"
         }
