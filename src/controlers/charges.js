@@ -115,7 +115,7 @@ const updateCharge = async (req, res) => {
       return res.status(400).json("Cliente não cadastrado");
     }
 
-    const convertedValue = Number(valor.replace(/\D/g, ''));
+    const convertedValue = valor.replace(".", '').replace(",",".");
 
     const updatedCharge = await knex('charges').where({ id: cobrancaId }).update({
       client_id: clienteId,
