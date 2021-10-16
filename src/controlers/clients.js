@@ -1,6 +1,7 @@
 const knex = require('../connection');
 const registerClientSchema = require('../yup_validations/registerClientSchema');
 const formateValidation = require('../utils/formateValidation');
+const { chargeDetails } = require('./charges');
 
 const registerClient = async (req, res) => {
   const { user } = req;
@@ -22,13 +23,13 @@ const registerClient = async (req, res) => {
     if (!cpfIsTrue) {
       return res.status(400).json(cpfMessageError)
     }
-    
+
     const existedCpf = await knex('clients').where({ cpf }).where({ user_id: user.id }).first();
-    
+
     if (existedCpf) {
       return res.status(400).json("Você já possui um cliente cadastrado com este cpf");
     };
-    
+
     telefone = telefone.replace(/\D/g, '');
     let { isTrue, messageError } = formateValidation(telefone);
 
@@ -62,6 +63,7 @@ const registerClient = async (req, res) => {
 
 const listClients = async (req, res) => {
   const { user } = req;
+  const { status } = req.query;
 
   try {
 
@@ -76,20 +78,26 @@ const listClients = async (req, res) => {
       return res.status(400).json("Você não possui clientes");
     }
 
-    clients = clients.map( async (client) => {
-      const overdueCharge = await knex('charges').where({client_id: client.id, status: "pendente"}).where('due_date', '<', new Date()).count('*').first()
-  
-      if(overdueCharge.count > 0){
+    clients = clients.map(async (client) => {
+      const overdueCharge = await knex('charges').where({ client_id: client.id, status: "pendente" })
+        .where('due_date', '<', new Date())
+        .count('*')
+        .first()
+
+      if (overdueCharge.count > 0) {
         client.status = "inadimplente"
-      }else{
-        client.status = "em_dia"
+      } else {
+        client.status = "em dia"
       }
       return client
     })
-    
-    clients = await Promise.all(clients)
+    clients = await Promise.all(clients);
 
-    return res.status(200).json({ clients })
+    if(status){
+      clients = clients.filter(client => client.status === status)
+    }
+
+    return res.status(200).json(clients)
   } catch (error) {
     return res.status(400).json(error.message)
   }
@@ -143,7 +151,7 @@ const updateClient = async (req, res) => {
         return res.status(400).json("Email já cadastrado");
       }
     };
-    
+
     cpf = cpf.replace(/\D/g, '');
 
     if (cpf !== client.cpf) {
@@ -160,7 +168,7 @@ const updateClient = async (req, res) => {
         return res.status(400).json("Cpf já cadastrado");
       }
     };
-    
+
     telefone = telefone.replace(/\D/g, '');
 
     if (telefone !== client.phone) {

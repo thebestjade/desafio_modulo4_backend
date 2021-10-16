@@ -21,6 +21,9 @@ routes.put('/editarCliente/:clienteId', clients.updateClient);
 routes.get('/clientes/:clienteId', clients.clientDetails);
 routes.get('/cobrancas', charges.listCharges);
 routes.post('/cadastrarCobranca', charges.registerCharges);
-
+routes.get('/cobrancas/:cobrancaId', charges.chargeDetails);
+routes.put('/editarCobranca/:cobrancaId', charges.updateCharge);
+routes.delete('/deletarCobranca/:cobrancaId', charges.deleteCharge);
+ 
 module.exports = routes;
 
