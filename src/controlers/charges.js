@@ -60,7 +60,11 @@ const listCharges = async (req, res) => {
     }
 
     if(status){
-      charges = charges.filter(charge => charge.status === status)
+      charges = charges.filter(charge => charge.status === status);
+
+      if (!charges.length) {
+        return res.status(204).json(`Você não possui cobranças com status = ${status}`);
+      }
     }
 
     return res.status(200).json(charges);
