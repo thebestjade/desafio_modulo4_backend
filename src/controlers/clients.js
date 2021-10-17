@@ -1,7 +1,6 @@
 const knex = require('../connection');
 const registerClientSchema = require('../yup_validations/registerClientSchema');
 const formateValidation = require('../utils/formateValidation');
-const { chargeDetails } = require('./charges');
 
 const registerClient = async (req, res) => {
   const { user } = req;
@@ -75,7 +74,7 @@ const listClients = async (req, res) => {
       .returning('*');
 
     if (!clients.length) {
-      return res.status(400).json("Você não possui clientes");
+      return res.status(204).json("Você não possui clientes");
     }
 
     clients = clients.map(async (client) => {
@@ -94,7 +93,11 @@ const listClients = async (req, res) => {
     clients = await Promise.all(clients);
 
     if(status){
-      clients = clients.filter(client => client.status === status)
+      clients = clients.filter(client => client.status === status);
+
+      if (!clients.length) {
+        return res.status(204).json(`Você não possui clientes com status = ${status}`);
+      }
     }
 
     return res.status(200).json(clients)
