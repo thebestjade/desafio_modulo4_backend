@@ -38,9 +38,9 @@ const home = async (req, res) => {
   const { user } = req;
   let clientsUpToDate;
   let defaulterClients;
-  let expectedCharges;
-  let overdueCharges;
-  let chargesPaid;
+  let expectedCharges = 0;
+  let overdueCharges = 0;
+  let chargesPaid = 0;
 
   try {
     let clients = await knex("clients")
@@ -85,20 +85,14 @@ const home = async (req, res) => {
     ).length;
 
     let charges = await knex("charges")
-      .select("charges.id")
+      .select("charges.id", "charges.status", "charges.due_date")
       .leftJoin("clients", "charges.client_id", "clients.id")
       .where({ user_id: user.id })
-      .groupBy("charges.id")
+      .groupBy("charges.id", "charges.status")
       .returning("*");
 
-    if (!charges.length) {
-      expectedCharges = 0;
-      overdueCharges = 0;
-      chargesPaid = 0;
-    }
-
     for (let charge of charges) {
-      if (charge.status && charge.status.toLowerCase() === "pendente") {
+      if (charge.status.toLowerCase() === "pendente") {
         const convertedDueDate = new Date(charge.due_date).getTime();
         const todaysDate = new Date().getTime();
 
@@ -108,11 +102,11 @@ const home = async (req, res) => {
       }
     }
 
-    expectedCharges = charges.filter((charge) => charge.status && charge.status.toLowerCase() === "pendente").length;
-
-    overdueCharges = charges.filter((charge) => charge.status === "vencido").length;
-
-    chargesPaid = charges.filter((charge) => charge.status && charge.status.toLowerCase() === "pago").length;
+    charges.forEach(charge => {
+      if (charge.status.toLowerCase() === "pendente") expectedCharges++;
+      if (charge.status.toLowerCase() === "pago") chargesPaid++;
+      if (charge.status.toLowerCase() === "vencido") overdueCharges++;
+    })
 
     return res
       .status(200)
