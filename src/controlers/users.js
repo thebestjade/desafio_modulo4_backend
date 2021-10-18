@@ -108,11 +108,11 @@ const home = async (req, res) => {
       }
     }
 
-    expectedCharges = charges.filter((charge) => charge.status === "pendente").length;
+    expectedCharges = charges.filter((charge) => charge.status.toLowerCase() === "pendente").length;
 
     overdueCharges = charges.filter((charge) => charge.status === "vencido").length;
 
-    chargesPaid = charges.filter((charge) => charge.status === "pago").length;
+    chargesPaid = charges.filter((charge) => charge.status.toLowerCase() === "pago").length;
 
     return res
       .status(200)
