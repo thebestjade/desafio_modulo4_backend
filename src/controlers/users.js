@@ -78,19 +78,11 @@ const home = async (req, res) => {
 
     clients = await Promise.all(clients);
 
-    clientsUpToDate = clients.map((client) => client.status === "em dia");
+    clientsUpToDate = clients.filter((client) => client.status === "em dia").length;
 
-    if (!clientsUpToDate.length === 0) {
-      clientsUpToDate = 0;
-    }
-
-    defaulterClients = clients.map(
+    defaulterClients = clients.filter(
       (client) => client.status === "inadimplente"
-    );
-
-    if (!defaulterClients.length === 0) {
-      defaulterClients = 0;
-    }
+    ).length;
 
     let charges = await knex("charges")
       .select("charges.id")
@@ -116,20 +108,11 @@ const home = async (req, res) => {
       }
     }
 
-    expectedCharges = charges.map((charge) => charge.status === "pendente");
-    if (!expectedCharges.length === 0) {
-      expectedCharges = 0;
-    }
+    expectedCharges = charges.filter((charge) => charge.status.toLowerCase() === "pendente").length;
 
-    overdueCharges = charges.map((charge) => charge.status === "vencido");
-    if (!overdueCharges.length === 0) {
-      overdueCharges = 0;
-    }
+    overdueCharges = charges.filter((charge) => charge.status === "vencido").length;
 
-    chargesPaid = charges.map((charge) => charge.status === "pago");
-    if (!chargesPaid.length === 0) {
-      chargesPaid = 0;
-    }
+    chargesPaid = charges.filter((charge) => charge.status.toLowerCase() === "pago").length;
 
     return res
       .status(200)
