@@ -82,7 +82,7 @@ const listClients = async (req, res) => {
         .where('due_date', '<', new Date())
         .count('*')
         .first()
-
+      console.log(overdueCharge)
       if (overdueCharge.count > 0) {
         client.status = "inadimplente"
       } else {
