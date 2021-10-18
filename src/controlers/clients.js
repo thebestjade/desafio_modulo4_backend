@@ -74,7 +74,7 @@ const listClients = async (req, res) => {
       .returning('*');
 
     if (!clients.length) {
-      return res.status(204).json("Você não possui clientes");
+      return res.status(400).json("Você não possui clientes");
     }
 
     clients = clients.map(async (client) => {
@@ -96,7 +96,7 @@ const listClients = async (req, res) => {
       clients = clients.filter(client => client.status === status);
 
       if (!clients.length) {
-        return res.status(204).json(`Você não possui clientes com status = ${status}`);
+        return res.status(400).json(`Você não possui clientes com status = ${status}`);
       }
     }
 
