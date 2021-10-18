@@ -60,10 +60,10 @@ const listCharges = async (req, res) => {
     }
 
     if(status){
-      charges = charges.filter(charge => charge.status === status);
+      charges = charges.filter(charge => charge.status.toLowerCase() === status.toLowerCase());
 
       if (!charges.length) {
-        return res.status(204).json(`Você não possui cobranças com status = ${status}`);
+        return res.status(400).json(`Você não possui cobranças com status = ${status}`);
       }
     }
 
