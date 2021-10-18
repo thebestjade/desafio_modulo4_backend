@@ -18,7 +18,7 @@ const registerCharges = async (req, res) => {
     const registeredCharge = await knex('charges').insert({
       client_id: clienteId,
       description: descricao,
-      status,
+      status: status.toLowerCase(),
       value: convertedValue,
       due_date: vencimento
     });
@@ -56,9 +56,6 @@ const listCharges = async (req, res) => {
         if (convertedDueDate < todaysDate) {
           charge.status = "vencido"
         }
-      }
-      if(charge.status === "Pago"){
-        charge.status = charge.status.toLowerCase();
       }
     }
 
@@ -127,7 +124,7 @@ const updateCharge = async (req, res) => {
     const updatedCharge = await knex('charges').where({ id: cobrancaId }).update({
       client_id: clienteId,
       description: descricao,
-      status,
+      status: status.toLowerCase(),
       value: convertedValue,
       due_date: vencimento
     });
