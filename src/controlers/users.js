@@ -106,7 +106,7 @@ const home = async (req, res) => {
     }
 
     for (let charge of charges) {
-      if (charge.status.toLowerCase() === "pendente") {
+      if (charge.status && charge.status.toLowerCase() === "pendente") {
         const convertedDueDate = new Date(charge.due_date).getTime();
         const todaysDate = new Date().getTime();
 
