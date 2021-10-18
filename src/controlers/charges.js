@@ -14,7 +14,7 @@ const registerCharges = async (req, res) => {
     }
 
     await registerChargeSchema.validate(req.body);
-    const convertedValue = valor.replaceAll(".", '').replace(",",".");
+    const convertedValue = valor.replace(/\./g, '').replace(",",".");
     const registeredCharge = await knex('charges').insert({
       client_id: clienteId,
       description: descricao,
