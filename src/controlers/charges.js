@@ -48,7 +48,7 @@ const listCharges = async (req, res) => {
     }
 
     for (let charge of charges) {
-      if (charge.status === "pendente") {
+      if (charge.status.toLowerCase() === "pendente") {
         charge.status = charge.status.toLowerCase();
         const convertedDueDate = new Date(charge.due_date).getTime();
         const todaysDate = new Date().getTime();
@@ -66,7 +66,7 @@ const listCharges = async (req, res) => {
       charges = charges.filter(charge => charge.status.toLowerCase() === status.toLowerCase());
 
       if (!charges.length) {
-        return res.status(400).json(`Você não possui cobranças com status ${status}`);
+        return res.status(400).json(`Você não possui cobranças com status = ${status}`);
       }
     }
 
