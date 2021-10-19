@@ -44,7 +44,7 @@ const listCharges = async (req, res) => {
       .where({ user_id: user.id });
 
     if (!charges.length) {
-      return res.status(204).json("Você não possui cobranças cadastradas")
+      return res.status(400).json("Você não possui cobranças cadastradas")
     }
 
     for (let charge of charges) {
@@ -63,7 +63,7 @@ const listCharges = async (req, res) => {
       charges = charges.filter(charge => charge.status.toLowerCase() === status.toLowerCase());
 
       if (!charges.length) {
-        return res.status(204).json(`Você não possui cobranças com status = ${status}`);
+        return res.status(400).json(`Você não possui cobranças com status = ${status}`);
       }
     }
 
