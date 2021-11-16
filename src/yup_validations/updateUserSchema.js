@@ -1,7 +1,7 @@
 const yup = require('./config');
 
 const updateUserSchema = yup.object().shape({
-  nome: yup.string().required(),
+  name: yup.string().required(),
   email: yup.string().required().email()
 });
 
