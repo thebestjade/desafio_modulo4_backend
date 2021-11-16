@@ -4,7 +4,7 @@ const formateValidation = require('../utils/formateValidation');
 
 const registerClient = async (req, res) => {
   const { user } = req;
-  let { nome, email, cpf, telefone, cep, logradouro, complemento, bairro, cidade, estado } = req.body;
+  let { name, email, cpf, phone, cep, public_place, complement, district, city, uf } = req.body;
 
   try {
 
@@ -29,8 +29,8 @@ const registerClient = async (req, res) => {
       return res.status(400).json("Você já possui um cliente cadastrado com este cpf");
     };
 
-    telefone = telefone.replace(/\D/g, '');
-    let { isTrue, messageError } = formateValidation(telefone);
+    phone = phone.replace(/\D/g, '');
+    let { isTrue, messageError } = formateValidation(phone);
 
     if (!isTrue) {
       return res.status(400).json(messageError)
@@ -38,16 +38,16 @@ const registerClient = async (req, res) => {
 
     const registeredClient = await knex('clients').insert({
       user_id: user.id,
-      name: nome,
+      name,
       email,
       cpf,
-      phone: telefone,
+      phone,
       cep,
-      public_place: logradouro,
-      complement: complemento,
-      district: bairro,
-      city: cidade,
-      uf: estado
+      public_place,
+      complement,
+      district,
+      city,
+      uf
     });
 
     if (!registeredClient) {
@@ -107,17 +107,17 @@ const listClients = async (req, res) => {
 };
 
 const clientDetails = async (req, res) => {
-  const { clienteId } = req.params;
+  const { clientId } = req.params;
   const { user } = req;
 
   try {
-    const client = await knex('clients').where({ user_id: user.id }).where({ id: clienteId }).first();
+    const client = await knex('clients').where({ user_id: user.id }).where({ id: clientId}).first();
 
     if (!client) {
       return res.status(400).json("Cliente não cadastrado");
     }
 
-    const clientCharges = await knex('charges').where({ client_id: clienteId }).returning('*');
+    const clientCharges = await knex('charges').where({ client_id: clientId }).returning('*');
 
     if (!clientCharges) {
       return res.status(400).json("O cliente não possui cobranças cadastradas");
@@ -132,14 +132,14 @@ const clientDetails = async (req, res) => {
 };
 
 const updateClient = async (req, res) => {
-  let { nome, email, cpf, telefone, cep, logradouro, complemento, bairro, cidade, estado
+  let { name, email, cpf, phone, cep, public_place, complement, district, city, uf
   } = req.body;
   const { user } = req;
-  const { clienteId } = req.params;
+  const { clientId } = req.params;
 
   try {
 
-    const client = await knex('clients').where({ user_id: user.id }).where({ id: clienteId }).first();
+    const client = await knex('clients').where({ user_id: user.id }).where({ id: clientId }).first();
 
     if (!client) {
       return res.status(400).json("Cliente não cadastrado");
@@ -172,28 +172,28 @@ const updateClient = async (req, res) => {
       }
     };
 
-    telefone = telefone.replace(/\D/g, '');
+    phone = phone.replace(/\D/g, '');
 
-    if (telefone !== client.phone) {
+    if (phone !== client.phone) {
 
-      let { isTrue, messageError } = formateValidation(telefone);
+      let { isTrue, messageError } = formateValidation(phone);
 
       if (!isTrue) {
         return res.status(400).json(messageError);
       }
     };
 
-    const updatedClient = await knex('clients').where({ id: clienteId }).update({
-      name: nome,
+    const updatedClient = await knex('clients').where({ id: clientId }).update({
+      name,
       email,
-      phone: telefone,
+      phone,
       cpf,
       cep,
-      public_place: logradouro,
-      complement: complemento,
-      district: bairro,
-      city: cidade,
-      uf: estado
+      public_place,
+      complemento,
+      district,
+      city,
+      uf
     });
 
     if (!updatedClient) {
