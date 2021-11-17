@@ -12,7 +12,19 @@ function formateValidation(formatedValue) {
   }
 
   return { isTrue, messageError };
+};
+
+function valueConverted(value) {
+  return value.replace(".", '').replace(",",".");
+};
+
+function convertedPhoneEndCpf(phoneOrCpf) {
+  return phoneOrCpf.replace(/\D/g, '');
 }
 
 
-module.exports = formateValidation;
+module.exports = {
+  formateValidation,
+  valueConverted,
+  convertedPhoneEndCpf
+};

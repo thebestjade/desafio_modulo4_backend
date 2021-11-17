@@ -1,5 +1,6 @@
 const knex = require('../connection');
 const registerChargeSchema = require('../yup_validations/registerChargesSchema');
+const { valueConverted } = require('../utils/formateValidation');
 
 const registerCharges = async (req, res) => {
   const { user } = req;
@@ -14,12 +15,12 @@ const registerCharges = async (req, res) => {
     }
 
     await registerChargeSchema.validate(req.body);
-    const convertedValue = value.replace(/\./g, '').replace(",",".");
+    
     const registeredCharge = await knex('charges').insert({
       client_id: clientId,
       description,
       status: status.toLowerCase(),
-      value: convertedValue,
+      value: valueConverted(value),
       due_date
     });
 
@@ -119,13 +120,11 @@ const updateCharge = async (req, res) => {
       return res.status(400).json("Cliente não cadastrado");
     }
 
-    const convertedValue = value.replace(".", '').replace(",",".");
-
     const updatedCharge = await knex('charges').where({ id: chargeId }).update({
       client_id: clientId,
       description,
       status: status.toLowerCase(),
-      value: convertedValue,
+      value: valueConverted(value),
       due_date
     });
 
