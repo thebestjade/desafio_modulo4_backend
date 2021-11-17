@@ -3,24 +3,24 @@ const registerChargeSchema = require('../yup_validations/registerChargesSchema')
 
 const registerCharges = async (req, res) => {
   const { user } = req;
-  const { clienteId, descricao, status, valor, vencimento } = req.body;
+  const { clientId, description, status, value, due_date } = req.body;
 
   try {
     
-    const client = await knex('clients').where({ user_id: user.id }).where({ id: clienteId }).first();
+    const client = await knex('clients').where({ user_id: user.id }).where({ id: clientId }).first();
 
     if (!client) {
       return res.status(400).json("Cliente não cadastrado");
     }
 
     await registerChargeSchema.validate(req.body);
-    const convertedValue = valor.replace(/\./g, '').replace(",",".");
+    const convertedValue = value.replace(/\./g, '').replace(",",".");
     const registeredCharge = await knex('charges').insert({
-      client_id: clienteId,
-      description: descricao,
+      client_id: clientId,
+      description,
       status: status.toLowerCase(),
       value: convertedValue,
-      due_date: vencimento
+      due_date
     });
 
     if (!registeredCharge) {
@@ -74,14 +74,14 @@ const listCharges = async (req, res) => {
 };
 
 const chargeDetails = async (req, res) => {
-  const { cobrancaId } = req.params;
+  const { chargeId } = req.params;
   const { user } = req;
 
   try {
     const charge = await knex('charges')
       .select('charges.id', 'clients.name', 'charges.description', 'charges.value', 'charges.status', 'charges.due_date')
       .leftJoin('clients', 'charges.client_id', 'clients.id')
-      .where({ user_id: user.id }).where('charges.id', cobrancaId).first();
+      .where({ user_id: user.id }).where('charges.id', chargeId).first();
 
     if (!charge) {
       return res.status(400).json("Cobrança não cadastrada");
@@ -96,8 +96,8 @@ const chargeDetails = async (req, res) => {
 }
 
 const updateCharge = async (req, res) => {
-  let { clienteId, descricao, status, valor, vencimento } = req.body;
-  const { cobrancaId } = req.params;
+  let { clientId, description, status, value, due_date } = req.body;
+  const { chargeId } = req.params;
   const { user } = req;
 
   try {
@@ -105,7 +105,7 @@ const updateCharge = async (req, res) => {
     const charge = await knex('charges')
       .select('charges.id', 'clients.name', 'charges.description', 'charges.value', 'charges.status', 'charges.due_date')
       .leftJoin('clients', 'charges.client_id', 'clients.id')
-      .where({ user_id: user.id }).where('charges.id', cobrancaId).first();
+      .where({ user_id: user.id }).where('charges.id', chargeId).first();
 
     if (!charge) {
       return res.status(400).json("Cobrança não cadastrada");
@@ -113,20 +113,20 @@ const updateCharge = async (req, res) => {
 
     await registerChargeSchema.validate(req.body);
 
-    const client = await knex('clients').where({ user_id: user.id }).where({ id: clienteId }).first();
+    const client = await knex('clients').where({ user_id: user.id }).where({ id: clientId }).first();
 
     if (!client) {
       return res.status(400).json("Cliente não cadastrado");
     }
 
-    const convertedValue = valor.replace(".", '').replace(",",".");
+    const convertedValue = value.replace(".", '').replace(",",".");
 
-    const updatedCharge = await knex('charges').where({ id: cobrancaId }).update({
-      client_id: clienteId,
-      description: descricao,
+    const updatedCharge = await knex('charges').where({ id: chargeId }).update({
+      client_id: clientId,
+      description,
       status: status.toLowerCase(),
       value: convertedValue,
-      due_date: vencimento
+      due_date
     });
 
     if (!updatedCharge) {
@@ -142,7 +142,7 @@ const updateCharge = async (req, res) => {
 };
 
 const deleteCharge = async (req, res) => {
-  const { cobrancaId } = req.params;
+  const { chargeId } = req.params;
   const { user } = req;
 
   try {
@@ -150,13 +150,13 @@ const deleteCharge = async (req, res) => {
     const charge = await knex('charges')
       .select('charges.id', 'clients.name', 'charges.description', 'charges.value', 'charges.status', 'charges.due_date')
       .leftJoin('clients', 'charges.client_id', 'clients.id')
-      .where({ user_id: user.id }).where('charges.id', cobrancaId).first();
+      .where({ user_id: user.id }).where('charges.id', chargeId).first();
 
     if (!charge) {
       return res.status(400).json("Cobrança não cadastrada");
     }
 
-    const deletedCharge = await knex('charges').del().where({ id: cobrancaId });
+    const deletedCharge = await knex('charges').del().where({ id: chargeId });
 
     if (!deletedCharge) {
       return res.status(400).json("Não foi possível deletar a cobrança");

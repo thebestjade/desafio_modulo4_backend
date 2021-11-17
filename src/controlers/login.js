@@ -5,7 +5,7 @@ const jwt_secret = require('../jwt_secret');
 const loginSchema = require('../yup_validations/loginSchema');
 
 const login = async (req, res) => {
-  const { email, senha } = req.body;
+  const { email, bodyPassword } = req.body;
   try {
 
     await loginSchema.validate(req.body);
@@ -16,7 +16,7 @@ const login = async (req, res) => {
       return res.status(404).json("Usuário não cadastrado");
     }
 
-    const verifiedPassword = await bcrypt.compare(senha, user.password);
+    const verifiedPassword = await bcrypt.compare(bodyPassword, user.password);
 
     if (!verifiedPassword) {
       return res.status(400).json("Email e/ou senha incorreto");

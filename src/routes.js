@@ -7,23 +7,23 @@ const tokenValidation = require('./filters/tokenValidation');
 
 const routes = express();
 
-routes.post('/cadastrarUsuario', users.registerUser);
+routes.post('/register', users.registerUser);
 routes.post('/login', login);
 
 routes.use(tokenValidation);
 
 routes.get('/', users.home);
-routes.get('/perfil', users.profile);
-routes.put('/editarUsuario', users.updateUser);
-routes.post('/cadastrarCliente', clients.registerClient);
-routes.get('/clientes', clients.listClients);
-routes.put('/editarCliente/:clienteId', clients.updateClient);
-routes.get('/clientes/:clienteId', clients.clientDetails);
-routes.get('/cobrancas', charges.listCharges);
-routes.post('/cadastrarCobranca', charges.registerCharges);
-routes.get('/cobrancas/:cobrancaId', charges.chargeDetails);
-routes.put('/editarCobranca/:cobrancaId', charges.updateCharge);
-routes.delete('/deletarCobranca/:cobrancaId', charges.deleteCharge);
+routes.get('/profile', users.profile);
+routes.put('/profile', users.updateUser);
+routes.post('/register/clients', clients.registerClient);
+routes.get('/clients', clients.listClients);
+routes.put('/clients/:clientId', clients.updateClient);
+routes.get('/clients/:clientId', clients.clientDetails);
+routes.get('/charges', charges.listCharges);
+routes.post('/register/charges', charges.registerCharges);
+routes.get('/charges/:chargeId', charges.chargeDetails);
+routes.put('/charges/:chargeId', charges.updateCharge);
+routes.delete('/charges/:chargeId', charges.deleteCharge);
  
 module.exports = routes;
 

@@ -5,7 +5,7 @@ const updateUserSchema = require("../yup_validations/updateUserSchema");
 const formateValidation = require("../utils/formateValidation");
 
 const registerUser = async (req, res) => {
-  const { nome, email, senha } = req.body;
+  const { name, email, password } = req.body;
 
   try {
     await registerUserSchema.validate(req.body);
@@ -16,10 +16,10 @@ const registerUser = async (req, res) => {
       return res.status(400).json("Usuário já cadastrado");
     }
 
-    const criptPassword = await bcrypt.hash(senha, 10);
+    const criptPassword = await bcrypt.hash(password, 10);
 
     const registeredUser = await knex("users").insert({
-      name: nome,
+      name,
       email,
       password: criptPassword,
     });
@@ -127,7 +127,7 @@ const profile = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  let { nome, email, senha, cpf, telefone } = req.body;
+  let { name, email, password, cpf, phone } = req.body;
   let updatedUserPassword;
   const { user } = req;
 
@@ -160,8 +160,8 @@ const updateUser = async (req, res) => {
       }
     }
 
-    if (telefone) {
-      telefone = telefone.replace(/\D/g, "");
+    if (phone) {
+      phone = phone.replace(/\D/g, "");
 
       const { isTrue, messageError } = formateValidation(telefone);
 
@@ -170,14 +170,14 @@ const updateUser = async (req, res) => {
       }
     }
 
-    if (senha) {
-      if (senha.length >= 5) {
-        senha = await bcrypt.hash(senha, 10);
+    if (password) {
+      if (password.length >= 5) {
+        password = await bcrypt.hash(password, 10);
 
         updatedUserPassword = await knex("users")
           .where({ id: user.id })
           .update({
-            password: senha,
+            password
           });
 
         if (!updatedUserPassword) {
@@ -193,9 +193,9 @@ const updateUser = async (req, res) => {
     }
 
     const updatedUser = await knex("users").where({ id: user.id }).update({
-      name: nome,
+      name,
       email,
-      phone: telefone,
+      phone,
       cpf,
     });
 
